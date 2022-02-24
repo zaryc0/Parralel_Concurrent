@@ -4,26 +4,35 @@
 
 #include <stdio.h>
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-
-__global__ void addKernel(int *c, const int *a, const int *b)
+__global__ void addKernel(int c[][32], const int a[][32], const int b[][32])
 {
     int i = threadIdx.x;
-    c[i] = a[i] + b[i];
-    printf("Thread ID : %d Block: ID: %d", threadIdx.x, blockIdx.x);
+    int j = threadIdx.y;
+
+    c[i][j] = a[i][j] + b[i][j];
+    //printf("Thread ID : (%d,%d) Block: ID: (%d,%d)\n", threadIdx.x, threadIdx.y, blockIdx.x,blockIdx.y);
 }
 
 int main()
 {
-    const int size = 5;
-    const int a[size] = { 1, 2, 3, 4, 5 };
-    const int b[size] = { 10, 20, 30, 40, 50 };
-    int c[size] = { 0 };
+    const int size = 32;
+    int a[size][size];
+    int b[size][size];
+    int c[size][size];
 
-    int* dev_a = 0;
-    int* dev_b = 0;
-    int* dev_c = 0;
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            a[i][j] = i + j;
+            b[i][j] = (i + j) * 10;
+        }
+    }
     
+    int( *dev_a)[size];
+    int( *dev_b)[size];
+    int( *dev_c)[size];
+
     // Add vectors in parallel.
     cudaError_t cudaStatus;
 
@@ -43,60 +52,61 @@ int main()
     }
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
+    cudaStatus = cudaMalloc((void**)&dev_c, size * size * sizeof(int));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
-    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
+    cudaStatus = cudaMalloc((void**)&dev_a, size * size * sizeof(int));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
-    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
+    cudaStatus = cudaMalloc((void**)&dev_b, size * size * sizeof(int));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
     // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
+    cudaStatus = cudaMemcpy(dev_a, a, size * size * sizeof(int), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
 
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) 
+    cudaStatus = cudaMemcpy(dev_b, b, size * size * sizeof(int), cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess)
     {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
-    cudaStatus = cudaMemcpy(dev_c, c, size * sizeof(int), cudaMemcpyHostToDevice);
+    cudaStatus = cudaMemcpy(dev_c, c, size * size * sizeof(int), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess)
     {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
 
-    //addKernel << <1, 5 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <2, 3 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <2, 4 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <2, 5 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <2, 6 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <3, 2 >> > (dev_c, dev_a, dev_b);
-    //addKernel << <3, 3 >> > (dev_c, dev_a, dev_b);
+    addKernel << <1, dim3(32,32) >> > (dev_c, dev_a, dev_b);
 
     cudaDeviceSynchronize();
-    cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(c, dev_c, size * size * sizeof(int), cudaMemcpyDeviceToHost);
 
     cudaFree(dev_c);
     cudaFree(dev_a);
     cudaFree(dev_b);
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n", c[0], c[1], c[2], c[3], c[4]);
+    printf("a + b =...\n");
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            printf("c[%d,%d] = %d \n", i, j, c[i][j]);
+        }
+    }
 
 
 Error:

@@ -1,0 +1,5 @@
+﻿  Compiling CUDA source file kernel.cu...
+  
+  E:\Repos\Paalel and concurent\Parralel_Concurrent\Cuda Lab A\Cuda_Lab_A\Cuda_Lab_A>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Users\cotgr\AppData\Roaming\VisualStudio2019\VC\Tools\MSVC\14.29.30133\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\kernel.cu.obj "E:\Repos\Paalel and concurent\Parralel_Concurrent\Cuda Lab A\Cuda_Lab_A\Cuda_Lab_A\kernel.cu" 
+  kernel.cu
+  Cuda_Lab_A.vcxproj -> E:\Repos\Paalel and concurent\Parralel_Concurrent\Cuda Lab A\Cuda_Lab_A\x64\Debug\Cuda_Lab_A.exe
