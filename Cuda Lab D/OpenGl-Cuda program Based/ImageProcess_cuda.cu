@@ -50,21 +50,25 @@ cudaTextureObject_t rgbaTexdImage;
 __global__ void d_render(uchar4* d_output, uint width, uint height, float tx,
     float ty, float scale, float cx, float cy,
     cudaTextureObject_t texObj) {
-    uint x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
-    uint y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
-    uint i = __umul24(y, width) + x;
-
-    float u = (x - cx) * scale + cx + tx;
-    float v = (y - cy) * scale + cy + ty;
+    uint x = blockIdx.x * blockDim.x + threadIdx.x;
+    uint y = blockIdx.y * blockDim.y + threadIdx.y;
+    uint i = y * width + x;
+    float2 T = { 0, -0};
+    float2 S = { 2, -0.5 };
+        T: 
+            x += T.x;
+            y += T.y; 
+        S: 
+            x *= S.x;
+            y *= S.y;
 
     if ((x < width) && (y < height)) {
         // write output color
-        float c = tex2D<float>(texObj, u, v);
 
-        d_output[i] = make_uchar4(c * 0xff, c * 0xff, c * 0xff, 0);
+        float c = tex2D<float>(texObj, x, y);
+        d_output[i] = make_uchar4(0, 0, c * 0xff, 0);
     }
 }
-
 
 extern "C" void initTexture(int imageWidth, int imageHeight, uchar * h_data) {
     // allocate array and copy image data

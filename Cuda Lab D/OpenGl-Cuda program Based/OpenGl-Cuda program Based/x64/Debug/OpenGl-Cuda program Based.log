@@ -1,1 +1,20 @@
-﻿  OpenGl-Cuda program Based.vcxproj -> C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\x64\Debug\OpenGl-Cuda program Based.exe
+﻿  Compiling CUDA source file ..\ImageProcess_cuda.cu...
+  
+  C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\OpenGl-Cuda program Based>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.29.30133\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\ImageProcess_cuda.cu.obj "C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu" 
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(58): warning : label "T" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(61): warning : label "S" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(113): warning : variable "tx" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(113): warning : variable "ty" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(113): warning : variable "scale" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(113): warning : variable "cx" was declared but never referenced
+  
+C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\ImageProcess_cuda.cu(113): warning : variable "cy" was declared but never referenced
+  
+  ImageProcess_cuda.cu
+     Creating library C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\x64\Debug\OpenGl-Cuda program Based.lib and object C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\x64\Debug\OpenGl-Cuda program Based.exp
+  OpenGl-Cuda program Based.vcxproj -> C:\Temp\Parralel_Concurrent\Cuda Lab D\OpenGl-Cuda program Based\x64\Debug\OpenGl-Cuda program Based.exe
