@@ -47,8 +47,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v11.3\common\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v11.3\common\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v11.2\common\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v11.2\common\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

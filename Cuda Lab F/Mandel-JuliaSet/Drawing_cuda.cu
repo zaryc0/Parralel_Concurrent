@@ -52,22 +52,29 @@ __global__ void d_render(uchar4* d_output, uint width, uint height) {
     float v = y / (float)height;
     u = 2.0 * u - 1.0;
     v = -(2.0 * v - 1.0);
-
-    uint c = 255;
-    float r = 0.5;
-    //c= ((((x & 0x80) == 0) ^ ((y & 0x80)) == 0));
+    //scale u by aspect ratio
+    u *= width / (float)height;
+    u *= 2.0;
+    v *= 2.0;
+    float2 z = { u,v };
+    float2 T = {0.3,0.9};
+    float r = 0.0;
+    float c = 1.0;
+    for (int i = 0; i < 30; i++)
+    {
+        z = { z.x * z.x - z.y * z.y,2.0f * z.x * z.y, };
+        z += T;
+        r = sqrtf(z.x * z.x + z.y * z.y);
+        if (r > 5.0)
+        {
+            c = 0.0;
+            break;
+        }
+    }
     if ((x < width) && (y < height)) 
     {
-        float dist = sqrtf(powf(u - (0) ,2) + powf(v - (0),2));
 
-        if(dist<r)
-        {
-            d_output[i] = make_uchar4(0x00 , 0x00 , 0xff , 0);
-        }
-        else
-        {
-            d_output[i] = make_uchar4(0x66, 0x99, 0x00, 0);
-        }
+        d_output[i] = make_uchar4(c*0x00 , c*0x00 , c*0xff , 0);
     }
 }
 
