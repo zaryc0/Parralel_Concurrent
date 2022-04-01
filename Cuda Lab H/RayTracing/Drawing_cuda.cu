@@ -49,15 +49,17 @@ typedef unsigned char uchar;
 
 cudaArray* d_imageArray = 0;
 __device__ static int ticks = 1;
-__device__ static double x_position = 0.0;
-__device__ static double y_position = 0.0;
-__device__ static double x_velocity = 0.02;
-__device__ static double y_velocity = 0.03;
+__device__ static int colour_index = 1;
+__device__ static vec3 sphere_centres[3];
+__device__ static vec3 sphere_velocitys[3];
+__device__ static vec3 sphere_colours[3];
 
 __device__ vec3 castRay(const ray& r, hitable** world) {
     hit_record rec;
+
     if ((*world)->hit(r, 0.0, FLT_MAX, rec)) {
-        return 0.5f * vec3(rec.normal.x() + 1.0f, rec.normal.y() + 1.0f, rec.normal.z() + 1.0f);
+        vec3 result = 0.5f * vec3(rec.normal.x() + 1.0f , rec.normal.y() + 1.0f, rec.normal.z() + 1.0f);
+        return result * (rec.colour/255);
     }
     else {
         vec3 unit_direction = unit_vector(r.direction());
@@ -66,33 +68,68 @@ __device__ vec3 castRay(const ray& r, hitable** world) {
     }
 }
 __global__ void create_world(hitable** d_list, hitable** d_world) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-        //define vectors
-        vec3 left   = vec3(-10002.0,        0,        0);
-        vec3 right  = vec3( 10002.0,        0,        0);
-        vec3 bottom = vec3(       0, -10002.0,        0);
-        vec3 top    = vec3(       0,  10002.0,        0);
-        vec3 back   = vec3(       0,        0, -10001.0);
-        int wall_size = 10000;
-        //Create the walls
-        *(d_list + 0) = new sphere(left, wall_size);
-        *(d_list + 1) = new sphere(right, wall_size);
-        *(d_list + 2) = new sphere(bottom, wall_size);
-        *(d_list + 3) = new sphere(top, wall_size);
-        *(d_list + 4) = new sphere(back, wall_size);
-        //Create the balls
-        *(d_list + 5) = new sphere(vec3( x_position += x_velocity, y_position += y_velocity, 0), 0.2);
-        if (x_position - 0.2 <= left.x() + wall_size || x_position + 0.2 >= right.x() - wall_size)
-        {
-            x_velocity *= -1;
-        }
-        if (y_position - 0.2 <= bottom.y() + wall_size || y_position + 0.2 >= top.y() - wall_size)
-        {
-            y_velocity *= -1;
+    if (threadIdx.x == 0 && blockIdx.x == 0) 
+    {
+        //define wall vec3s
+        vec3 lef = vec3(-10002.0,        0,        0);
+        vec3 rig = vec3( 10002.0,        0,        0);
+        vec3 bot = vec3(       0, -10002.0,        0);
+        vec3 top = vec3(       0,  10002.0,        0);
+        vec3 bac = vec3(       0,        0, -10001.0);
+
+        //define the colours
+        vec3 blank = vec3(255, 255, 255);
+        int number_of_colours = 6;
+        vec3 colour_list[6];
+        colour_list[0] = vec3(066, 245, 242);
+        colour_list[1] = vec3(245, 066, 224);
+        colour_list[2] = vec3(245, 242, 066);
+        colour_list[3] = vec3(000, 255, 000);
+        colour_list[4] = vec3(000, 000, 255);
+        colour_list[5] = vec3(255, 000, 000);
+
+        //initialise sphers statics
+        if (sphere_velocitys[0].x() == 0 && sphere_velocitys[0].y() == 0 && sphere_velocitys[0].z() == 0) { sphere_velocitys[0] = vec3(0.01, 0.05, 0); sphere_colours[0] = vec3(150, 150, 150); }
+        if (sphere_velocitys[1].x() == 0 && sphere_velocitys[1].y() == 0 && sphere_velocitys[1].z() == 0) { sphere_velocitys[1] = vec3(-0.03, -0.01, 0); sphere_colours[1] = vec3(150, 150, 150); }
+        if (sphere_velocitys[2].x() == 0 && sphere_velocitys[2].y() == 0 && sphere_velocitys[2].z() == 0) { sphere_velocitys[2] = vec3(0.05, -0.02, 0); sphere_colours[0] = vec3(150, 150, 150);
         }
 
-        //move balls
-        *d_world = new hitable_list(d_list, 6);
+        int wall_size = 10000;
+        //Create the walls
+        *(d_list + 0) = new sphere(lef, blank, vec3(0, 0, 0), wall_size);
+        *(d_list + 1) = new sphere(rig, blank, vec3(0, 0, 0), wall_size);
+        *(d_list + 2) = new sphere(bot, blank, vec3(0, 0, 0), wall_size);
+        *(d_list + 3) = new sphere(top, blank, vec3(0, 0, 0), wall_size);
+        *(d_list + 4) = new sphere(bac, blank, vec3(0, 0, 0), wall_size);
+        //Modify balls
+        for (int i = 0; i < 3; i++)
+        {
+            //move balls
+            sphere_centres[i] += sphere_velocitys[i];
+            //Test Collisions
+            if (sphere_centres[i].x() - 0.2 <= lef.x() + wall_size || sphere_centres[i].x() + 0.2 >= rig.x() - wall_size)
+            {
+                sphere_colours[i] = colour_list[colour_index];
+                colour_index++;
+                if (colour_index > 5)
+                {
+                    colour_index = 0;
+                }
+                sphere_velocitys[i] = vec3(sphere_velocitys[i].x() * -1, sphere_velocitys[i].y(), sphere_velocitys[i].z());
+            }
+            if (sphere_centres[i].y() - 0.2 <= bot.y() + wall_size || sphere_centres[i].y() + 0.2 >= top.y() - wall_size)
+            {
+                sphere_colours[i] = colour_list[colour_index];
+                colour_index++;
+                if (colour_index > 5)
+                {
+                    colour_index = 0;
+                }
+                sphere_velocitys[i] = vec3(sphere_velocitys[i].x(), sphere_velocitys[i].y() * -1, sphere_velocitys[i].z());
+            }
+            *(d_list + i + 5) = new sphere(sphere_centres[i], sphere_colours[i], sphere_velocitys[i], 0.2);
+        }
+        *d_world = new hitable_list(d_list, 8);
     }
 }
 __global__ void free_world(hitable** d_list, hitable** d_world) {
@@ -160,7 +197,7 @@ extern "C"
     void render(int width, int height,  dim3 blockSize, dim3 gridSize, uchar4 * output) 
 {
     hitable **d_list;
-    checkCudaErrors(cudaMalloc((void **)&d_list, 6 * sizeof(hitable*)));
+    checkCudaErrors(cudaMalloc((void **)&d_list, 8 * sizeof(hitable*)));
     hitable **d_world;
     checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(hitable*)));
     create_world << <1, 1 >> > (d_list, d_world);
